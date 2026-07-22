@@ -6,16 +6,40 @@
     <h1>Our Collection ({{ books|length }} books)</h1>
 
     <div class="book-grid">
-        {% for slug, book in books %}
+        {% for book in books %}
             <div class="book-card">
                 <h2>
-                    <a href="{{ path('app_book_show', { slug: slug }) }}">
+                    <a href="{{ path('app_book_show', {id: book.id}) }}">
                         {{ book.title }}
                     </a>
                 </h2>
-                <p>{{ book.author }}  {{ book.year }}</p>
-                <em>{{ book.genre }}</em>
+
+                {% if book.authors is not empty %}
+                    <p>
+                        {% for author in book.authors %}
+                            {{ author.name }}{% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                    </p>
+                {% endif %}
+
+                {% if book.publicationDate %}
+                    <p>{{ book.publicationDate|date('Y') }}</p>
+                {% endif %}
+
+                {% if book.genres is not empty %}
+                    <p>
+                        {% for genre in book.genres %}
+                            <em>{{ genre.name }}</em>{% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                    </p>
+                {% endif %}
+
+                {# Lien Edit vers l'admin #}
+                <a href="{{ path('app_admin_book_edit', {id: book.id}) }}" class="btn btn-outline-secondary">Edit</a>
+
             </div>
+        {% else %}
+            <p>No books found.</p>
         {% endfor %}
     </div>
 {% endblock %}

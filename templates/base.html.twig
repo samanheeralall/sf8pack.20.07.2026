@@ -27,6 +27,11 @@
     </header>
     <main>
         {# `body` matches Symfony's convention; `main` would be more semantic #}
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }}">{{ message }}</div>
+            {% endfor %}
+        {% endfor %}
         {% block body %}{% endblock %}
     </main>
     <footer>
