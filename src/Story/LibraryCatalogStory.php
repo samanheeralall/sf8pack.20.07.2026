@@ -3,6 +3,7 @@
 namespace App\Story;
 
 use App\Factory\BookFactory;
+use App\Factory\GenreFactory;
 use Zenstruck\Foundry\Attribute\AsFixture;
 use Zenstruck\Foundry\Story;
 
@@ -14,10 +15,18 @@ final class LibraryCatalogStory extends Story
         $books = require dirname(__DIR__, 2) . '/fixtures/book_fixtures.php';
 
         BookFactory::createMany(\count($books), static function (int $i) use ($books) {
-            // Day 2: strip relation data — the entity has no authors/genres yet
-            unset($books[$i - 1]['author'], $books[$i - 1]['genres']);
+            $book   = $books[$i - 1];
+            $genres = $book['genres'];
 
-            return $books[$i - 1];
+            unset($book['author'], $book['genres']);
+
+            return [
+                ...$book,
+                'genres' => array_map(
+                    static fn (string $name) => GenreFactory::findOrCreate(['name' => $name]),
+                    $genres,
+                ),
+            ];
         });
     }
 }

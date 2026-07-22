@@ -1,0 +1,53 @@
+<?php
+
+namespace App\Factory;
+
+use App\Entity\Genre;
+use Zenstruck\Foundry\Persistence\PersistentObjectFactory;
+
+/**
+ * @extends PersistentObjectFactory<Genre>
+ */
+final class GenreFactory extends PersistentObjectFactory
+{
+    /**
+     * @see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#factories-as-services
+     *
+     * @todo inject services if required
+     */
+    public function __construct()
+    {
+    }
+
+    #[\Override]
+    public static function class(): string
+    {
+        return Genre::class;
+    }
+
+    /**
+     * @see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#model-factories
+     *
+     * @todo add your default values here
+     */
+    #[\Override]
+    protected function defaults(): array|callable
+    {
+        $names = ['Fantasy', 'Science Fiction', 'Young Adult', 'Gothic'];
+
+        return [
+            'name' => self::faker()->randomElement($names),
+        ];
+    }
+
+    /**
+     * @see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#initialization
+     */
+    #[\Override]
+    protected function initialize(): static
+    {
+        return $this
+            // ->afterInstantiate(function(Genre $genre): void {})
+        ;
+    }
+}
