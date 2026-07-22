@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Authors - Community Library{% endblock %}
+
+{% block body %}
+    <h1>Authors ({{ authors|length }})</h1>
+
+    {% for author in authors %}
+        <div class="author-card">
+            <h3>{{ author.name }}</h3>
+            <p>{{ author.books|length }} books in the catalog</p>
+        </div>
+    {% endfor %}
+{% endblock %}
