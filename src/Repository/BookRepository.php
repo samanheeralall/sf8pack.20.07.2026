@@ -6,6 +6,7 @@ use App\Entity\Book;
 use App\Search\BookSearchCriteria;
 use App\Search\BookSortColumn;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -43,7 +44,11 @@ class BookRepository extends ServiceEntityRepository
     //        ;
     //    }
 
-    public function search(BookSearchCriteria $criteria): array
+    public function search(
+        BookSearchCriteria $criteria,
+        int $page    = 1,
+        int $perPage = 10,
+    ): Paginator
     {
         $qb = $this->createQueryBuilder('b')
             ->addSelect('a')
@@ -80,6 +85,9 @@ class BookRepository extends ServiceEntityRepository
 
         $qb->orderBy($sortField, $direction);
 
-        return $qb->getQuery()->getResult();
+        $qb->setFirstResult(($page - 1) * $perPage)
+            ->setMaxResults($perPage);
+
+        return new Paginator($qb);
     }
 }

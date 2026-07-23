@@ -89,7 +89,32 @@
                     <p>No books found.</p>
                 {% endfor %}
             </div>
+            {% if totalPages > 1 %}
+                <nav class="pagination">
 
+                    {# Prev #}
+                    {% if page > 1 %}
+                        <a href="{{ path('app_book_index', app.request.query.all|merge({page: page - 1})) }}">
+                            ← Prev
+                        </a>
+                    {% else %}
+                        <span class="disabled">← Prev</span>
+                    {% endif %}
+
+                    {# Page X of Y #}
+                    <span>Page {{ page }} of {{ totalPages }}</span>
+
+                    {# Next #}
+                    {% if page < totalPages %}
+                        <a href="{{ path('app_book_index', app.request.query.all|merge({page: page + 1})) }}">
+                            Next →
+                        </a>
+                    {% else %}
+                        <span class="disabled">Next →</span>
+                    {% endif %}
+
+                </nav>
+            {% endif %}
         </section>
     </div>
 {% endblock %}
