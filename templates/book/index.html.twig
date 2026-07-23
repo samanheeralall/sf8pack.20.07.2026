@@ -34,8 +34,9 @@
                     </p>
                 {% endif %}
 
-                {# Lien Edit vers l'admin #}
-                <a href="{{ path('app_admin_book_edit', {id: book.id}) }}" class="btn btn-outline-secondary">Edit</a>
+                {% if is_granted('ROLE_ADMIN') %}
+                    <a href="{{ path('app_admin_book_edit', {id: book.id}) }}" class="btn btn-outline-secondary">Edit</a>
+                {% endif %}
 
             </div>
         {% else %}
