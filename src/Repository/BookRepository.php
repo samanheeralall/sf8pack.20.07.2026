@@ -3,6 +3,8 @@
 namespace App\Repository;
 
 use App\Entity\Book;
+use App\Search\BookSearchCriteria;
+use App\Search\BookSortColumn;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -41,26 +43,42 @@ class BookRepository extends ServiceEntityRepository
     //        ;
     //    }
 
-    public function search(array $criteria = []): array
+    public function search(BookSearchCriteria $criteria): array
     {
         $qb = $this->createQueryBuilder('b')
-            ->addSelect('a')                    // On évite le N+1 sur authors
-            ->leftJoin('b.authors', 'a')
-            ->orderBy('b.title', 'ASC');
+            ->addSelect('a')
+            ->leftJoin('b.authors', 'a');
 
-        if (!empty($criteria['q'])) {
+        if ($criteria->q !== '') {
             $qb->andWhere('b.title LIKE :q')
-                ->setParameter('q', '%'.$criteria['q'].'%');
+                ->setParameter('q', '%'.$criteria->q.'%');
         }
 
-        if (!empty($criteria['author'])) {
+        if ($criteria->author !== null) {
             $qb->andWhere('a.name LIKE :author')
-                ->setParameter('author', '%'.$criteria['author'].'%');
+                ->setParameter('author', '%'.$criteria->author.'%');
         }
 
-        if (!empty($criteria['available'])) {
+        if ($criteria->genre !== null) {
+            $qb->addSelect('g')
+                ->leftJoin('b.genres', 'g')
+                ->andWhere('g.id = :genre')
+                ->setParameter('genre', $criteria->genre);
+        }
+
+        if ($criteria->available) {
             $qb->andWhere('b.available = true');
         }
+
+        $sortField = match ($criteria->sort) {
+            BookSortColumn::Title           => 'b.title',
+            BookSortColumn::Author          => 'a.name',
+            BookSortColumn::PublicationDate => 'b.publicationDate',
+        };
+
+        $direction = strtolower($criteria->direction) === 'asc' ? 'ASC' : 'DESC';
+
+        $qb->orderBy($sortField, $direction);
 
         return $qb->getQuery()->getResult();
     }
