@@ -40,4 +40,28 @@ class BookRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
+
+    public function search(array $criteria = []): array
+    {
+        $qb = $this->createQueryBuilder('b')
+            ->addSelect('a')                    // On évite le N+1 sur authors
+            ->leftJoin('b.authors', 'a')
+            ->orderBy('b.title', 'ASC');
+
+        if (!empty($criteria['q'])) {
+            $qb->andWhere('b.title LIKE :q')
+                ->setParameter('q', '%'.$criteria['q'].'%');
+        }
+
+        if (!empty($criteria['author'])) {
+            $qb->andWhere('a.name LIKE :author')
+                ->setParameter('author', '%'.$criteria['author'].'%');
+        }
+
+        if (!empty($criteria['available'])) {
+            $qb->andWhere('b.available = true');
+        }
+
+        return $qb->getQuery()->getResult();
+    }
 }

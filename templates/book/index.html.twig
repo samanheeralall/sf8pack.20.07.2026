@@ -5,42 +5,56 @@
 {% block body %}
     <h1>Our Collection ({{ books|length }} books)</h1>
 
-    <div class="book-grid">
-        {% for book in books %}
-            <div class="book-card">
-                <h2>
-                    <a href="{{ path('app_book_show', {id: book.id}) }}">
-                        {{ book.title }}
-                    </a>
-                </h2>
+    <div class="listing-layout">
+        <aside class="listing-sidebar">
+            <h2>Filter</h2>
+            {{ form_start(form) }}
+            {{ form_row(form.q) }}
+            {{ form_row(form.author) }}
+            {{ form_row(form.available) }}
+            <button type="submit">Search</button>
+            {{ form_end(form) }}
+        </aside>
 
-                {% if book.authors is not empty %}
-                    <p>
-                        {% for author in book.authors %}
-                            {{ author.name }}{% if not loop.last %}, {% endif %}
-                        {% endfor %}
-                    </p>
-                {% endif %}
+        <section class="listing-main">
+            <div class="book-grid">
+                {% for book in books %}
+                    <div class="book-card">
+                        <h2>
+                            <a href="{{ path('app_book_show', {id: book.id}) }}">
+                                {{ book.title }}
+                            </a>
+                        </h2>
 
-                {% if book.publicationDate %}
-                    <p>{{ book.publicationDate|date('Y') }}</p>
-                {% endif %}
+                        {% if book.authors is not empty %}
+                            <p>
+                                {% for author in book.authors %}
+                                    {{ author.name }}{% if not loop.last %}, {% endif %}
+                                {% endfor %}
+                            </p>
+                        {% endif %}
 
-                {% if book.genres is not empty %}
-                    <p>
-                        {% for genre in book.genres %}
-                            <em>{{ genre.name }}</em>{% if not loop.last %}, {% endif %}
-                        {% endfor %}
-                    </p>
-                {% endif %}
+                        {% if book.publicationDate %}
+                            <p>{{ book.publicationDate|date('Y') }}</p>
+                        {% endif %}
 
-                {% if is_granted('ROLE_ADMIN') %}
-                    <a href="{{ path('app_admin_book_edit', {id: book.id}) }}" class="btn btn-outline-secondary">Edit</a>
-                {% endif %}
+                        {% if book.genres is not empty %}
+                            <p>
+                                {% for genre in book.genres %}
+                                    <em>{{ genre.name }}</em>{% if not loop.last %}, {% endif %}
+                                {% endfor %}
+                            </p>
+                        {% endif %}
 
+                        {% if is_granted('ROLE_ADMIN') %}
+                            <a href="{{ path('app_admin_book_edit', {id: book.id}) }}" class="btn btn-outline-secondary">Edit</a>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <p>No books found.</p>
+                {% endfor %}
             </div>
-        {% else %}
-            <p>No books found.</p>
-        {% endfor %}
+        </section>
     </div>
+
 {% endblock %}
