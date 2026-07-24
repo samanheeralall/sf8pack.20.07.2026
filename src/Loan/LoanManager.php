@@ -5,13 +5,16 @@ namespace App\Loan;
 use App\Entity\Book;
 use App\Entity\Loan;
 use App\Entity\User;
+use App\Event\LoanCreatedEvent;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class LoanManager
 {
-    private const int DEFAULT_DURATION_DAYS = 14;
+    private const DEFAULT_DURATION_DAYS = 14;
     public function __construct(          // 1. Dependencies
-        private readonly EntityManagerInterface $em
+        private EntityManagerInterface $em,
+        private EventDispatcherInterface $eventDispatcher
     ) {}
 
     public function createLoan(User $user, Book $book): Loan  // 2. Domain verb
@@ -21,7 +24,7 @@ class LoanManager
             throw new \RuntimeException('Book not available');
         }
 
-        // Instanciation de l'entité Loan
+        // Créer le prêt
         $loan = new Loan();
         $loan->setUser($user);
         $loan->setBook($book);
@@ -36,6 +39,8 @@ class LoanManager
         // 4. Side effects
         $this->em->persist($loan);
         $this->em->flush();
+
+        $this->eventDispatcher->dispatch(new LoanCreatedEvent($loan));
 
         return $loan;
     }

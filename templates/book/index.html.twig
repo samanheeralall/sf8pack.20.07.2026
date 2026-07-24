@@ -80,6 +80,14 @@
                             </p>
                         {% endif %}
 
+                        {% if book.available %}
+                            <form method="POST" action="{{ path('app_loan_new', {id: book.id}) }}">
+                                <button type="submit" class="btn">Borrow</button>
+                            </form>
+                        {% else %}
+                            <span class="muted">Currently on loan</span>
+                        {% endif %}
+
                         {% if is_granted('book.edit_details', book) %}
                             <a href="{{ path('app_admin_book_edit', {id: book.id}) }}"
                                class="btn btn-outline-secondary">Edit</a>
