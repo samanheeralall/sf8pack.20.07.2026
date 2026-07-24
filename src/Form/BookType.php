@@ -52,12 +52,19 @@ class BookType extends AbstractType
                 'required'     => false,
             ])
         ;
+
+        if ($options['can_change_availability']) {
+            $builder->add('available', CheckboxType::class, [
+                'required' => false,
+            ]);
+        }
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => Book::class,
+            'can_change_availability' => false,
         ]);
     }
 }

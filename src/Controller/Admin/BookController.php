@@ -5,6 +5,7 @@ namespace App\Controller\Admin;
 use App\Entity\Book;
 use App\Form\BookType;
 use App\Repository\BookRepository;
+use App\Security\BookPermission;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -23,10 +24,13 @@ class BookController extends AbstractController
         ]);
     }
     #[Route('/admin/books/new', name: 'app_admin_book_new', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_LIBRARIAN')]
     public function new(Request $request, EntityManagerInterface $em): Response
     {
         $book = new Book();
-        $form = $this->createForm(BookType::class, $book);
+        $form = $this->createForm(BookType::class, $book, [
+            'can_change_availability' => $this->isGranted('book.change_availability', $book)
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -40,13 +44,22 @@ class BookController extends AbstractController
 
         return $this->render('admin/book/save.html.twig', [
             'form' => $form,
+            'book' => $book,
         ]);
     }
 
     #[Route('/admin/books/{id}/edit', name: 'app_admin_book_edit', methods: ['GET', 'POST'])]
+    #[IsGranted(BookPermission::EDIT_DETAILS, subject: 'book')]
     public function edit(Request $request,Book $book,EntityManagerInterface $em): Response
     {
-        $form = $this->createForm(BookType::class, $book);
+        /*        $this->denyAccessUnlessGranted(
+            BookPermission::EDIT_DETAILS,
+            $book
+        );*/
+
+        $form = $this->createForm(BookType::class, $book, [
+            'can_change_availability' => $this->isGranted('book.change_availability', $book)
+        ]);
 
         $dateField = $form->get('publicationDate');
 
@@ -68,7 +81,7 @@ class BookController extends AbstractController
 
         $form->handleRequest($request);
 
-        if ($form->isSubmitted()) {
+/*        if ($form->isSubmitted()) {
             $dateField = $form->get('publicationDate');
 
             dd('3 — Après handleRequest()', [
@@ -81,9 +94,10 @@ class BookController extends AbstractController
                 'transformation réussie' => $dateField->isSynchronized(),
                 'formulaire valide' => $form->isValid(),
             ]);
-        }
+        }*/
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $book->setAddedBy($this->getUser());
             $em->flush();
 
             $this->addFlash('success', 'Book created successfully!');
@@ -92,6 +106,7 @@ class BookController extends AbstractController
 
         return $this->render('admin/book/save.html.twig', [
             'form' => $form,
+            'book' => $book,
         ]);
     }
 }
